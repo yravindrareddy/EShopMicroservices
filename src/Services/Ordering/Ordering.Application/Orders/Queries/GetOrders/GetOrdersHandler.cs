@@ -1,4 +1,5 @@
 ﻿using BuildingBlocks.Pagination;
+using Microsoft.EntityFrameworkCore;
 
 namespace Ordering.Application.Orders.Queries.GetOrders;
 public class GetOrdersHandler(IApplicationDbContext dbContext)
@@ -15,7 +16,9 @@ public class GetOrdersHandler(IApplicationDbContext dbContext)
         var totalCount = await dbContext.Orders.LongCountAsync(cancellationToken);
 
         var orders = await dbContext.Orders
+                       .AsNoTracking()
                        .Include(o => o.OrderItems)
+                       .AsSplitQuery()
                        .OrderBy(o => o.OrderName.Value)
                        .Skip(pageSize * pageIndex)
                        .Take(pageSize)
